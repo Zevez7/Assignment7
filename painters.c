@@ -222,7 +222,7 @@ int main() {
     pthread_create(&Leonardo_tid, NULL, (void *) paint, Leonardo);
 
     // TODO: Add 50 more artists 
-    int rookieArtists = 5;
+    int rookieArtists = 50;
     pthread_t moreArtists_tid[rookieArtists];
     artist_t **moreArtists = malloc(sizeof(artist_t) * rookieArtists);
 
