@@ -222,9 +222,9 @@ int main() {
     // Join each with the main thread.
     // Do you think our ordering of launching each thread matters?
     pthread_join(Michaelangelo_tid, NULL);
-//    pthread_join(Donatello_tid, NULL);
-//    pthread_join(Raphael_tid, NULL);
-//    pthread_join(Leonardo_tid, NULL);
+    pthread_join(Donatello_tid, NULL);
+    pthread_join(Raphael_tid, NULL);
+    pthread_join(Leonardo_tid, NULL);
 
     // TODO: Add the join the 50 other artists threads here	
     // for (...)
