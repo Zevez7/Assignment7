@@ -104,7 +104,7 @@ void *paint(void *args) {
     int trylockCancelCount = 0;
     // Our artist will now attempt to paint 5000 strokes of paint
     // on our shared canvas
-    for (int i = 0; i < 1000; ++i) {
+    for (int i = 0; i < 5000; ++i) {
 
         // Store our initial position
         int currentX = painter->x;
@@ -116,6 +116,8 @@ void *paint(void *args) {
         int roll = (rand() % 8);
         painter->x += movement[roll][0];
         painter->y += movement[roll][1];
+//        printf("rollX %d \n", movement[roll][0]);
+//        printf("rollY %d \n", movement[roll][1]);
         // Clamp the range of our movements so we only
         // paint within our 256x256 canvas.
         if (painter->x < 0) { painter->x = 0; }
@@ -127,34 +129,40 @@ void *paint(void *args) {
         // at first glance this seems okay, but convince yourself
         // we can still have data races.
         // I suggest investigating a 'trylock'
-        if (pthread_mutex_trylock(&canvas[painter->x][painter->y].lock) == 0) {
 
-            printf("trylock was able to lock pixel\n");
-            // Try to paint
-            // paint the pixel if it is white.
-            if (canvas[painter->x][painter->y].r == 255 &&
-                canvas[painter->x][painter->y].g == 255 &&
-                canvas[painter->x][painter->y].b == 255) {
+//            printf("trylock was able to lock pixel\n");
+        // Try to paint
+        // paint the pixel if it is white.
+        if (canvas[painter->x][painter->y].r == 255 &&
+            canvas[painter->x][painter->y].g == 255 &&
+            canvas[painter->x][painter->y].b == 255) {
+
+            if (pthread_mutex_trylock(&canvas[painter->x][painter->y].lock) == 0) {
                 canvas[painter->x][painter->y].r = painter->r;
                 canvas[painter->x][painter->y].g = painter->g;
                 canvas[painter->x][painter->y].b = painter->b;
+
+                pthread_mutex_unlock(&canvas[painter->x][painter->y].lock);
             } else {
-                printf("unable to paint color was not white \n");
-                // If we cannot paint the pixel, then we backtrack
-                // to a previous pixel that we own.
-                painter->x = currentX;
-                painter->y = currentY;
+//                printf("NO LOCK painterx: %d, paintery: %d \n", painter->x, painter->y);
+//
+//                printf("Pixel locked, unable paint,%d \n", trylockCancelCount);
+                trylockCancelCount++;
             }
 
-            pthread_mutex_unlock(&canvas[painter->x][painter->y].lock);
-            printf("unlocked pixel\n");
-
         } else {
-            printf("Pixel locked, unable paint,%d \n", trylockCancelCount);
-            trylockCancelCount++;
+//                printf("unable to paint color was not white \n");
+            // If we cannot paint the pixel, then we backtrack
+            // to a previous pixel that we own.
+            painter->x = currentX;
+            painter->y = currentY;
         }
+
+//            printf("unlocked pixel\n");
+
+
     }
-    printf("trylockCancelCount: %d \n",trylockCancelCount);
+    printf("trylockCancelCount: %d \n", trylockCancelCount);
     return NULL;
 }
 
@@ -214,10 +222,14 @@ int main() {
     pthread_create(&Leonardo_tid, NULL, (void *) paint, Leonardo);
 
     // TODO: Add 50 more artists 
-    // int rookieArtists = 50;
-    // pthread_t moreArtists_tid[rookieArtists];
-    // artist_t* moreArtists = malloc(..);
-    // for(int i =0; i < rookieArtists; ++i){
+//    int rookieArtists = 3;
+//    pthread_t moreArtists_tid[rookieArtists];
+//    artist_t **moreArtists = malloc(sizeof(artist_t) * rookieArtists);
+//    for (int i = 0; i < rookieArtists; ++i) {
+//        pthread_create(&moreArtists_tid[i], NULL, (void *) paint, moreArtists[i]);
+//
+//
+//    }
 
     // Join each with the main thread.
     // Do you think our ordering of launching each thread matters?
@@ -227,7 +239,11 @@ int main() {
     pthread_join(Leonardo_tid, NULL);
 
     // TODO: Add the join the 50 other artists threads here	
-    // for (...)
+//    for (int i = 0; i < rookieArtists; ++i) {
+//        pthread_join(moreArtists_tid[i], NULL);
+//
+//
+//    }
 
     // Save our canvas at the end of the painting session
     outputCanvas();
