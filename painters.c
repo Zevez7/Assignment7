@@ -271,6 +271,11 @@ int main() {
     free(Donatello);
     free(Raphael);
     free(Leonardo);
+    for (int i = 0; i < rookieArtists; ++i) {
+
+        free(moreArtists[i]);
+    }
+    free(moreArtists);
 
     // TODO: Free any other memory you can think of
 
