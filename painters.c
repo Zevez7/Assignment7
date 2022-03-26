@@ -138,14 +138,16 @@ void *paint(void *args) {
             canvas[painter->x][painter->y].b == 255) {
 
             if (pthread_mutex_trylock(&canvas[painter->x][painter->y].lock) == 0) {
+
+                sleep(1);
+
                 canvas[painter->x][painter->y].r = painter->r;
                 canvas[painter->x][painter->y].g = painter->g;
                 canvas[painter->x][painter->y].b = painter->b;
 
                 pthread_mutex_unlock(&canvas[painter->x][painter->y].lock);
             } else {
-//                printf("NO LOCK painterx: %d, paintery: %d \n", painter->x, painter->y);
-//
+                printf("NO LOCK painterx: %d, paintery: %d \n", painter->x, painter->y);
 //                printf("Pixel locked, unable paint,%d \n", trylockCancelCount);
                 trylockCancelCount++;
             }
@@ -162,7 +164,9 @@ void *paint(void *args) {
 
 
     }
-    printf("trylockCancelCount: %d \n", trylockCancelCount);
+    if (trylockCancelCount > 0) {
+        printf("trylockCancelCount: %d \n", trylockCancelCount);
+    }
     return NULL;
 }
 
@@ -222,7 +226,7 @@ int main() {
     pthread_create(&Leonardo_tid, NULL, (void *) paint, Leonardo);
 
     // TODO: Add 50 more artists 
-    int rookieArtists = 50;
+    int rookieArtists = 1000;
     pthread_t moreArtists_tid[rookieArtists];
     artist_t **moreArtists = malloc(sizeof(artist_t) * rookieArtists);
 
