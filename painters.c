@@ -222,14 +222,30 @@ int main() {
     pthread_create(&Leonardo_tid, NULL, (void *) paint, Leonardo);
 
     // TODO: Add 50 more artists 
-//    int rookieArtists = 3;
-//    pthread_t moreArtists_tid[rookieArtists];
-//    artist_t **moreArtists = malloc(sizeof(artist_t) * rookieArtists);
+    int rookieArtists = 5;
+    pthread_t moreArtists_tid[rookieArtists];
+    artist_t **moreArtists = malloc(sizeof(artist_t) * rookieArtists);
+
+    for (int i = 0; i < rookieArtists; ++i) {
+        moreArtists[i] = malloc(sizeof(artist_t));
+        moreArtists[i]->x = i * 2+1;
+        moreArtists[i]->y = i * 2+1;
+        moreArtists[i]->r = rand() % 256;
+        moreArtists[i]->g = i * 5;
+        moreArtists[i]->b = rand() % 256;
+    }
 //    for (int i = 0; i < rookieArtists; ++i) {
-//        pthread_create(&moreArtists_tid[i], NULL, (void *) paint, moreArtists[i]);
-//
+//        printf("moreArtistx: %d \n",moreArtists[i]->x );
+//        printf("moreArtisty: %d \n",moreArtists[i]->y );
+//        printf("moreArtistr: %d \n",moreArtists[i]->r );
+//        printf("moreArtistg: %d \n",moreArtists[i]->g );
+//        printf("moreArtistb: %d \n",moreArtists[i]->b );
 //
 //    }
+
+    for (int i = 0; i < rookieArtists; ++i) {
+        pthread_create(&moreArtists_tid[i], NULL, (void *) paint, moreArtists[i]);
+    }
 
     // Join each with the main thread.
     // Do you think our ordering of launching each thread matters?
@@ -239,11 +255,9 @@ int main() {
     pthread_join(Leonardo_tid, NULL);
 
     // TODO: Add the join the 50 other artists threads here	
-//    for (int i = 0; i < rookieArtists; ++i) {
-//        pthread_join(moreArtists_tid[i], NULL);
-//
-//
-//    }
+    for (int i = 0; i < rookieArtists; ++i) {
+        pthread_join(moreArtists_tid[i], NULL);
+    }
 
     // Save our canvas at the end of the painting session
     outputCanvas();
