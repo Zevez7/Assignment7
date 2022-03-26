@@ -154,7 +154,7 @@ void *paint(void *args) {
             trylockCancelCount++;
         }
     }
-    printf("trylockCancelCount: %d",trylockCancelCount);
+    printf("trylockCancelCount: %d \n",trylockCancelCount);
     return NULL;
 }
 
@@ -209,9 +209,9 @@ int main() {
 
     // Create our threads for each of our expert artists
     pthread_create(&Michaelangelo_tid, NULL, (void *) paint, Michaelangelo);
-//    pthread_create(&Donatello_tid, NULL, (void *) paint, Donatello);
-//    pthread_create(&Raphael_tid, NULL, (void *) paint, Raphael);
-//    pthread_create(&Leonardo_tid, NULL, (void *) paint, Leonardo);
+    pthread_create(&Donatello_tid, NULL, (void *) paint, Donatello);
+    pthread_create(&Raphael_tid, NULL, (void *) paint, Raphael);
+    pthread_create(&Leonardo_tid, NULL, (void *) paint, Leonardo);
 
     // TODO: Add 50 more artists 
     // int rookieArtists = 50;
