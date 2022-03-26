@@ -228,8 +228,8 @@ int main() {
 
     for (int i = 0; i < rookieArtists; ++i) {
         moreArtists[i] = malloc(sizeof(artist_t));
-        moreArtists[i]->x = i * 2+1;
-        moreArtists[i]->y = i * 2+1;
+        moreArtists[i]->x = rand() % 256;
+        moreArtists[i]->y = rand() % 256;
         moreArtists[i]->r = rand() % 256;
         moreArtists[i]->g = i * 5;
         moreArtists[i]->b = rand() % 256;
