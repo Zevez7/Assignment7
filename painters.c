@@ -11,8 +11,6 @@
 #define CANVAS_WIDTH 256
 #define CANVAS_HEIGHT 256
 
-pthread_mutex_t mutex;
-
 
 // Our canvas is a shared piece of memory that each artist can access.
 // Within our canvas, every pixel has a red, green, and blue component.
@@ -106,7 +104,7 @@ void *paint(void *args) {
     int trylockCancelCount = 0;
     // Our artist will now attempt to paint 5000 strokes of paint
     // on our shared canvas
-    for (int i = 0; i < 5000; ++i) {
+    for (int i = 0; i < 1000; ++i) {
 
         // Store our initial position
         int currentX = painter->x;
@@ -129,8 +127,9 @@ void *paint(void *args) {
         // at first glance this seems okay, but convince yourself
         // we can still have data races.
         // I suggest investigating a 'trylock'
-        if (pthread_mutex_trylock(&mutex) == 0) {
+        if (pthread_mutex_trylock(&canvas[painter->x][painter->y].lock) == 0) {
 
+            printf("trylock was able to lock pixel\n");
             // Try to paint
             // paint the pixel if it is white.
             if (canvas[painter->x][painter->y].r == 255 &&
@@ -140,24 +139,27 @@ void *paint(void *args) {
                 canvas[painter->x][painter->y].g = painter->g;
                 canvas[painter->x][painter->y].b = painter->b;
             } else {
+                printf("unable to paint color was not white \n");
                 // If we cannot paint the pixel, then we backtrack
                 // to a previous pixel that we own.
                 painter->x = currentX;
                 painter->y = currentY;
             }
+
+            pthread_mutex_unlock(&canvas[painter->x][painter->y].lock);
+            printf("unlocked pixel\n");
+
         } else {
-            printf("Thread is busy, cancel painting,%d \n", trylockCancelCount);
+            printf("Pixel locked, unable paint,%d \n", trylockCancelCount);
             trylockCancelCount++;
         }
     }
+    printf("trylockCancelCount: %d",trylockCancelCount);
     return NULL;
 }
 
 // ================== Program Entry Point ============
 int main() {
-
-    pthread_mutex_init(&mutex, NULL);
-
 
     // Initialize our 'blank' canvas
     initCanvas();
@@ -207,9 +209,9 @@ int main() {
 
     // Create our threads for each of our expert artists
     pthread_create(&Michaelangelo_tid, NULL, (void *) paint, Michaelangelo);
-    pthread_create(&Donatello_tid, NULL, (void *) paint, Donatello);
-    pthread_create(&Raphael_tid, NULL, (void *) paint, Raphael);
-    pthread_create(&Leonardo_tid, NULL, (void *) paint, Leonardo);
+//    pthread_create(&Donatello_tid, NULL, (void *) paint, Donatello);
+//    pthread_create(&Raphael_tid, NULL, (void *) paint, Raphael);
+//    pthread_create(&Leonardo_tid, NULL, (void *) paint, Leonardo);
 
     // TODO: Add 50 more artists 
     // int rookieArtists = 50;
@@ -220,9 +222,9 @@ int main() {
     // Join each with the main thread.
     // Do you think our ordering of launching each thread matters?
     pthread_join(Michaelangelo_tid, NULL);
-    pthread_join(Donatello_tid, NULL);
-    pthread_join(Raphael_tid, NULL);
-    pthread_join(Leonardo_tid, NULL);
+//    pthread_join(Donatello_tid, NULL);
+//    pthread_join(Raphael_tid, NULL);
+//    pthread_join(Leonardo_tid, NULL);
 
     // TODO: Add the join the 50 other artists threads here	
     // for (...)
